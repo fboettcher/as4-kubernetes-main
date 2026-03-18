@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: thuega-as4-dev
+  namespace: argocd
+spec:
+  project: thuega-as4-dev-project
+  destination:
+    namespace: thuega-as4-dev
+    server: https://nli-thuega-dev-aks-g5w774z1.privatelink.northeurope.azmk8s.io:443
+  sources:
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/deployment
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/ingress
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/loadbalancer
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/storage_class
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/scripts
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/monitoring
+    - repoURL: git@github.com:arvato-energy-platform/as4-kubernetes.git
+      targetRevision: main
+      path: dev/pod_disruption_budgets
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

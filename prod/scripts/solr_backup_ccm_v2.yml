@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: solr-backup-ccm-weekly
+spec:
+  schedule: "0 23 * * 1"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 18500  # allow up to ~5h runtime
+      template:
+        spec:
+          containers:
+          - name: solr-backup-ccm-weekly
+            image: curlimages/curl:latest
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: SOLR_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: solr-backup-secret
+                    key: username
+              - name: SOLR_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: solr-backup-secret
+                    key: password
+            command:
+              - /bin/sh
+              - -ec
+              - |
+                timestamp() { date +'%Y-%m-%d %H:%M:%S'; }
+
+                CURRENT_TIME=$(TZ=Europe/Berlin date +%Y-%m-%d_%H-%M)
+                REQUEST_ID="backup_ccm_${CURRENT_TIME}"
+
+                BACKUP_URL="https://solr-p-thuega.level-365.com/solr/admin/collections?action=BACKUP&name=ccm_${CURRENT_TIME}&collection=ccm&location=/var/solr/data/backup/ccm&maxNumBackupPoints=7&async=${REQUEST_ID}"
+                STATUS_URL="https://solr-p-thuega.level-365.com/solr/admin/collections?action=REQUESTSTATUS&requestid=${REQUEST_ID}"
+
+                echo "[$(timestamp)] [INFO] Triggering Solr async backup with requestId=${REQUEST_ID}"
+                curl -s -u "${SOLR_USER}:${SOLR_PASS}" "$BACKUP_URL"
+
+                STATUS="running"
+                RETRIES=0
+                MAX_RETRIES=300   # 60 minutes timeout (300 * 60s)
+
+                while [ "$STATUS" = "running" ] && [ $RETRIES -lt $MAX_RETRIES ]; do
+                  sleep 60
+                  RESPONSE=$(curl -s -u "${SOLR_USER}:${SOLR_PASS}" "$STATUS_URL")
+                  echo "[$(timestamp)] [DEBUG] RequestStatus response: $RESPONSE"
+                  STATUS=$(echo "$RESPONSE" | grep -o '"state":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+                  RETRIES=$((RETRIES+1))
+                done
+
+                if [ "$STATUS" = "completed" ]; then
+                  echo "[$(timestamp)] [INFO] Backup completed successfully"
+                else
+                  echo "[$(timestamp)] [ERROR] Backup failed or timed out (status=$STATUS)"
+                  exit 1
+                fi
+          restartPolicy: Never

@@ -1,0 +1,89 @@
+apiVersion: v2
+name: deployment
+description: A Helm chart for Kubernetes
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 2026-01-26
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: "1.0.0"
+
+dependencies:
+  - name: as4-address-service-helm
+    version: 2025-10-14
+    condition: as4-address-service-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-crypto-operations-helm
+    version: 2025-10-14
+    condition: as4-crypto-operations-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-cryptography-csr-helm
+    version: 2025-11-19-02
+    condition: as4-cryptography-csr-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-inbound-endpoint-helm
+    version: 2025-12-01
+    condition: as4-inbound-endpoint-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-message-service-helm
+    version: 2025-10-14
+    condition: as4-message-service-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-outbound-market-message-service-helm
+    version: 2025-10-14
+    condition: as4-outbound-market-message-service-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-outbound-sender-helm
+    version: 2025-10-14
+    condition: as4-outbound-sender-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: as4-receipt-service-helm
+    version: 2025-10-16
+    condition: as4-receipt-service-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/as4"
+
+  - name: crl-downloader-helm
+    version: 2025-10-22
+    condition: crl-downloader-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/crypto"
+
+  - name: b2b-message-service-helm
+    version: 2026-01-08
+    condition: b2b-message-service-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/b2b"
+
+  - name: certificate-manager-helm
+    version: 2025-12-25
+    condition: certificate-manager-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/crypto"
+
+  - name: rabbitmq-cluster-operator
+    version: 3.6.5
+    condition: rabbitmq-cluster-operator.enabled
+    repository: https://raw.githubusercontent.com/bitnami/charts/index/bitnami
+
+  - name: fss-helm
+    version: 2026-01-09
+    condition: fss-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/b2b"
+
+## Customer specific dependencies ##
+
+  # service for customer Thüga only
+  - name: mkg-shipping-status-sender-helm
+    version: 2025-07-24
+    condition: mkg-shipping-status-sender-helm.enabled
+    repository: "oci://devnortheuropemgmtacr.azurecr.io/aep/b2b"

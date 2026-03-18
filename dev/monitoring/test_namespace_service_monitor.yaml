@@ -1,0 +1,25 @@
+---
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: as4-dev-microservices
+#   namespace: monitoring
+#   labels:
+#     release: thuega-as4-dev-monitoring
+# spec:
+#   endpoints:
+#   - port: http
+#     scheme: http
+#     path: /actuator/prometheus
+#     interval: 15s
+#     scrapeTimeout: 14s
+#   - targetPort: 3333
+#     scheme: http
+#     path: /as4-crypto-csr/api/v1/actuator/prometheus
+#     interval: 15s
+#     scrapeTimeout: 14s
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/instance: thuega-as4-dev
+#   namespaceSelector:
+#     any: true

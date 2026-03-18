@@ -1,0 +1,213 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ldif-import-script
+spec:
+  schedule: "0 17 * * 2"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ldif-import-script
+            image: ubuntu:22.04
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Starting the setup...";
+              echo "Installing packages vim curl zip p7zip-full"
+              DEBIAN_FRONTEND=noninteractive apt-get -qq update >/dev/null && DEBIAN_FRONTEND=noninteractive apt-get -qq install -y vim curl zip p7zip-full >/dev/null;
+              echo "Packages installed.";
+              echo "Executing the script...";
+              # This script uploads certificates extracted from the ldif files downloaded from the configured subca urls.
+              # Usage e.g. : ./upload-certificate-ldif.sh
+
+              # Keycloak usage
+              # Ensure that the user's keycloak password and client secret is set in the following fields: PASSWORD, CLIENT_SECRET
+
+              # Pre-requisites: curl and unzip installed on same bash terminal - edit following constants as needed
+
+              # stop script execution on error
+              set -e
+
+              ########### Keycloak configuration ###########
+              keycloakEnabled=false
+              KEYCLOAK_URL="http://host.docker.internal:9000/auth/realms/as4/protocol/openid-connect/token"
+              CLIENT_ID="certificate-manager-service"
+              CLIENT_SECRET=""
+              USERNAME="certificate-manager-service-user"
+              PASSWORD=""
+
+              # api for uploading certificate
+              #UPLOAD_CERT_API="http://localhost:8080/aep-certificate-manager/certificates"
+              UPLOAD_CERT_API="http://thuega-as4-prod-certificate-manager.thuega-as4-production.svc.cluster.local:8080/aep-certificate-manager/certificates"
+
+              current_year=$(date +'%Y')
+              current_month=$(date +'%m')
+              current_day=$(date +'%d')
+
+              # urls for subca ldif files # https://www.countandcare.de/wp-content/uploads/$current_year/$current_month/MAK-$current_year$current_month$current_day.7z
+              SUBCA_URLs=(
+                "https://crl.sm-pki.atos.net/emtMak_Atos-Smart-Grid.zip"
+                "https://energyca.telesec.de/mak/MAK_T-Systems-EnergyCA.ldif"
+                "https://www.countandcare.de/wp-content/uploads/2025/04/MAK-20250402.7z"
+                "https://as-4-mako-sub-ca.da-rz.net/certs/MAK-latest.ldif"
+                "https://www.schleupen.de/fileadmin/EWW/Dokumente/Smart_Meter_Gateway_Administration/Wirkbetrieb_AS4_Marktkommunikation_EMT.MAK/Schleupen_SE_SubCA_WIRK.zip"
+                "http://ldaps.smartserviceca.sm-pki.smartservice.de:8080/subca_ssca_emt_export.ldif"
+                "https://ekn-energyca.telesec.de/mak/MAK_CA4Energy-EKN.ldif"
+                "https://crl.sm-pki.atos.net/emtMak_GWAdriga-SmartEnergy.zip"
+              )
+
+              certKey="userCertificate;binary"
+
+              # function for access token
+              getAccessToken() {
+                auth_response=$(curl --silent -X POST "$KEYCLOAK_URL" \
+                  -H "Content-Type: application/x-www-form-urlencoded" \
+                  -d "grant_type=password" \
+                  -d "client_id=$CLIENT_ID" \
+                  -d "client_secret=$CLIENT_SECRET" \
+                  -d "username=$USERNAME" \
+                  -d "password=$PASSWORD" \
+                  -w "\n%{http_code}")
+
+                auth_response_code=$(echo "$auth_response" | tail -n 1)
+                echo "Response code of getting keycloak access token: $auth_response_code"
+
+                if [ "$auth_response_code" != "200" ]; then
+                  rm -r ldif-data
+                  exit
+                fi
+
+                access_token=$(echo $auth_response | grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')
+                AUTHORIZATION_HEADER="Authorization: Bearer $access_token"
+
+              }
+
+              #function for uploading certificate
+              uploadCertificate() {
+                local cert="$(sed -e 's/[[:space:]]*$//' <<<${1})"
+                upload_cert_response=$(curl -s -o ldif-data/upload_cert_response.txt -w "%{http_code}" --location "$UPLOAD_CERT_API" \
+                  --header "$AUTHORIZATION_HEADER" \
+                  --header "Content-Type: application/json" \
+                  --data "{
+                  \"certificate\": \"$cert\"
+                  }
+                }")
+                if [ "$upload_cert_response" != "200" ]; then
+                  echo "error response from server: $upload_cert_response - line number ${2}"
+                  if [[ "$upload_cert_response" == "401" && "$keycloakEnabled" == true ]]; then
+                    getAccessToken
+                  else
+                    exit
+                  fi
+                fi
+              }
+
+              #function for parsing ldif file
+              parseFile() {
+                echo -e "*** parsing ldif file $filename ***\n"
+                lineNo=0
+                certLineNo=0
+                cert=""
+                isCertField=0
+
+                sed -i 's/\r$//' "${1}"
+
+                while read line; do
+
+                  ((lineNo = lineNo + 1))
+                  [ "${line:0:1}" == "#" ] && continue
+
+                  attr=${line%%:*}
+                  value=${line#*: }
+
+                  if [[ "$attr" == "$value" && "$isCertField" == "1" ]]; then
+                    cert="${cert}${value}"
+
+                  elif [ "$attr" == "$certKey" ]; then
+                    if [ -n "$cert" ]; then
+                      uploadCertificate "$cert" "$certLineNo"
+                    fi
+                    isCertField=1
+                    cert="$value"
+                    certLineNo="$lineNo"
+
+                  elif [ "$attr" != "$certKey" ]; then
+                    isCertField=0
+
+                  fi
+
+                done <"${1}"
+
+                if [ -n "$cert" ]; then
+                  uploadCertificate "$cert" "$certLineNo"
+
+                fi
+                echo -e "*** finished parsing ldif file $filename ***\n"
+              }
+
+              #function for setup and process file
+              processFile() {
+                SUBCA_URL=${1}
+                echo "file to download from url: $SUBCA_URL"
+                filename="${SUBCA_URL##*/}"
+                extension="${SUBCA_URL##*.}"
+                if [ -d "ldif-tmp" ]; then
+                  rm -r ldif-tmp
+                fi
+
+                mkdir ldif-tmp
+                cd ldif-tmp
+                curl -O "$SUBCA_URL"
+
+                if [ -f "$filename" ]; then
+                  if [ "$extension" == "ldif" ]; then
+                    mkdir ldif-data
+                    mv $filename ldif-data/
+                    parseFile "ldif-data/$filename"
+                  elif [ "$extension" == "zip" ]; then
+                    mkdir -p ldif-data
+                    if unzip -d ldif-data/ "$filename"; then
+                for file in ldif-data/*; do
+                        filename="ldif-data/${file##*/}"
+                        parseFile "$filename"
+                      done
+                    else
+                      echo "Failed to unzip downloaded file $filename"
+                    fi
+                  elif [ "$extension" == "7z" ]; then
+                    mkdir -p ldif-data
+                    if 7z x "$filename" -o./ldif-data/; then
+                      for file in ldif-data/*; do
+                        filename="ldif-data/${file##*/}"
+                        parseFile "$filename"
+                      done
+                    else
+                      echo "Failed to 7-unzip downloaded file $filename"
+                    fi
+                  fi
+                  rm -rf ldif-data
+                else
+                  echo "File does not exist."
+                fi
+                cd ..
+                rm -r ldif-tmp
+              }
+
+              if [ "$keycloakEnabled" == "true" ]; then
+                getAccessToken
+              else
+                echo "Skipping token access"
+                AUTHORIZATION_HEADER=""
+              fi
+
+              for SUBCA_URL in ${SUBCA_URLs[@]}; do
+                processFile "$SUBCA_URL"
+              done
+              echo "Script completed.";
+          restartPolicy: OnFailure

@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: certificate-manager
+  namespace: monitoring
+  labels:
+    release: thuega-as4-dev-monitoring
+spec:
+  endpoints:
+  - targetPort: 8080
+    scheme: http
+    path: /aep-certificate-manager/actuator/prometheus
+    interval: 15s
+    scrapeTimeout: 14s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: certificate-manager
+  namespaceSelector:
+    any: true

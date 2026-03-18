@@ -1,0 +1,20 @@
+---
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: mkg-shipping-status-sender
+#   namespace: monitoring
+#   labels:
+#     release: thuega-as4-dev-monitoring
+# spec:
+#   endpoints:
+#   - targetPort: 8080
+#     scheme: http
+#     path: /mkg-shipping-status-sender/actuator/prometheus
+#     interval: 15s
+#     scrapeTimeout: 14s
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: mkg-shipping-status-sender
+#   namespaceSelector:
+#     any: true

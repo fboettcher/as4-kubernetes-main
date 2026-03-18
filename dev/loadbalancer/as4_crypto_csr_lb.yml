@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: as4-cryptography-csr-lb
+  annotations:
+    'service.beta.kubernetes.io/azure-load-balancer-internal': 'true'
+    'service.beta.kubernetes.io/azure-load-balancer-internal-subnet': lbs_dev
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.30.128.5
+  selector:
+    app.kubernetes.io/name: as4-cryptography-csr
+  ports:
+    - protocol: TCP
+      port: 3333

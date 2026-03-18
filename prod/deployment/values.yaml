@@ -1,0 +1,3113 @@
+# Default values for deployment.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+as4-address-service-helm:
+  enabled: true
+  replicaCount: 2
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: "Europe/Berlin"
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    DATASOURCE_URL: "jdbc:postgresql://pgdb0528p01.postgres.database.azure.com:5432/db_28_b2bp01_as4_01?currentSchema=as4_address&sslmode=prefer"
+    DATASOURCE_USERNAME: "tu_a_as4p01_as4_address_01"
+    DATASOURCE_PASSWORD: "Nke3N7VsfZIZKqyoatmRJfBuGcC1yCxBuk6W6KEGJi"
+    DATASOURCE_TYPE: "postgres"
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    LOGGING_LEVEL_ROOT: 'WARN'
+    AUTOCONFIRMRELATION: 'true'
+    PATHSWITCHINBOUNDEXCHANGENAME: 'as4.inbound'
+    PATHSWITCHINBOUNDGROUP: 'pathswitch'
+    PATHSWITCHOUTBOUNDEXCHANGENAME: 'as4.receipt.outbound'
+    PATHSWITCHOUTBOUNDGROUP: 'pathswitch'
+    EXTERNALEVENTPATHSWITCHEXCHANGENAME: 'as4.pathswitch.delivery'
+    EXTERNALEVENTPATHSWITCHHEADERNAME: 'tenant'
+    EXTERNALEVENTPATHSWITCHHEADERVALUES: ''
+  
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 3Gi
+    requests:
+      cpu: 1500m
+      memory: 3Gi
+
+as4-crypto-operations-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: Europe/Berlin
+    SPRING_RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    SERVER_PORT: '8080'
+    CLIENTTENANT_FSSSHAREDCLIENT: 'shared-client'
+    SKIPRECEIPTVERIFICATION: 'true'
+    USEADDRESSFROMCERTIFICATE: 'true'
+    SPRING_PROFILES_ACTIVE: 'scaling'
+    SPRING_CLOUD_STREAM_BINDINGS_DECRYPTANDVERIFYIN0_CONSUMER_CONCURRENCY: '10'
+    SPRING_CLOUD_STREAM_BINDINGS_SIGNIN0_CONSUMER_CONCURRENCY: '10'
+    CONSUMER_MAX_ATTEMPTS: '3'
+    LOGGING_LEVEL_ROOT: 'INFO'
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '24-02-2026'
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+
+as4-cryptography-csr-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: Europe/Berlin
+    DATASOURCE_URL: jdbc:postgresql://pgdb0528p01.postgres.database.azure.com:5432/db_28_b2bp01_as4_01?currentSchema=as4_csr
+    DATASOURCE_USERNAME: 'tu_a_as4p01_as4_csr_01'
+    DATASOURCE_PASSWORD: '83pAVEPCN5AdXGsqUQ5wr7D89qGfVnKqEdixOnK2xR'
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:4444/fss/api/v1'
+    JDK_JAVA_OPTIONS: "-Djdk.tls.namedGroups=brainpoolP384r1,brainpoolP256r1,secp384r1,secp256r1"
+    SSL_TRUST_CLIENT: 'tlsIssuerClient'
+    CLIENT_SSL_ENABLED: 'true'
+    CLIENTS_EXCLUDEDFROMTENANTS_0: 'shared-client'
+    CLIENTS_EXCLUDEDFROMTENANTS_1: 'undefined'
+    USER_HOME: '/opt/out'
+    LOGGING_LEVEL_ROOT: 'WARN'
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-production.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    SPRING_AUTOCONFIGURE_EXCLUDE: ''
+    SPRING_CLOUD_STREAM_BINDERS_RABBIT_DEFAULTCANDIDATE: 'true'
+    SPRING_CLOUD_STREAM_DEFAULTBINDER: 'rabbit'
+    SPRING_CLOUD_STREAM_BINDINGS_CSREVENTPRODUCEROUT0_DESTINATION: 'csr.event'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CSREVENTPRODUCEROUT0_PRODUCER_ROUTINGKEYEXPRESSION: 'default'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CSREVENTPRODUCEROUT0_PRODUCER_EXCHANGETYPE: 'topic'
+
+  resources:
+    limits:
+      cpu: 400m
+      memory: 800Mi
+    requests:
+      cpu: 400m
+      memory: 800Mi
+
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /as4-crypto-csr/api/v1/actuator/health
+          port: 3333
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /as4-crypto-csr/api/v1/actuator/health
+          port: 3333
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /as4-crypto-csr/api/v1/actuator/health
+          port: 3333
+        failureThreshold: 900
+        periodSeconds: 5
+
+as4-inbound-endpoint-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-communicationservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-communicationservices
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 2000m
+      memory: 4Gi
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: 9900309000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903438000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900783000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978918000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905826000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910618000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905574000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905859000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906174000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905416000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900638000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910001000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904297000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903989000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906147000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910437000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904785000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907039000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905637000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911402000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900685000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904662000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900951000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9980017000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903487000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905058000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904083000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9983387000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903017000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900679000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906225000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979128000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9982898000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905806000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903429000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903474000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903720000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978876000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900307000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907254000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900717000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905508000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906580000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907204000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907281000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905807000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904424000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911509000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9977775000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903796000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 4260154980016.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903709000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903824000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900274000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903551000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907328000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911069000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906113000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9901066000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903575000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978777000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905949000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978508000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905215000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979116000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911726000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907158000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903984000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904913000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900782000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906681000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903579000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900452000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906902000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907687000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904995000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903527000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9912104000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900609000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904807000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904972000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905270000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905649000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900533000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903252000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978790000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900599000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900223000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903985000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900775000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900417000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900172000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903493000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903883000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900034000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911566000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903803000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903911000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905396000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910387000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978353000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978238000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978960000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900716000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905785000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906378000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900143000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904620000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903768000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9977892000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905160000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903929000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903959000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903251000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905021000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907751000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 4260154980030.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979003000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910040000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900201000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905413000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903933000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904392000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900343000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900051000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910630000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906894000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906491000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903875000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905141000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900760000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903509000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906932000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9984322000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9978996000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903725000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906172000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905107000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903791000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906925000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900024000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904351000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900273000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906497000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905088000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979034000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906595000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979313000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907273000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979215000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904866000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900036000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911382000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903039000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900658000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903524000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900299000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903953000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905010000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904078000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911007000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903367000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900298000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903906000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904782000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900328000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900043000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 4260154980054.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903679000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900336000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910538000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900434000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907701000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903855000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979216000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904790000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904079000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905002000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904026000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903313000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910803000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906624000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900076000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905273000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900593000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906943000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979059000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903821000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907317000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905552000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904786000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900704000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906938000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903562000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910082000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900960000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911137000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903705000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905415000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903588000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900761000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907763000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905142000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900346000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907566000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900072000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904729000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906593000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905518000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900432000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903059000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900631000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903726000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904743000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907075000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911489000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900926000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905693000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904242000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903945000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900983000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903981000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905936000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907184000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900050000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910046000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907324000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903650000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979345000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9979067000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903460000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906921000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903969000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904956000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911965000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904788000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903704000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903020000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904869000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9904238000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9984773000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9985007000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9980325000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905848000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905771000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906621000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907543000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910190000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9985065000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800007000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800247000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870023900003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800061900004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800126700000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870042800002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800034800009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800121200005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800505600003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800511700003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870032500000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870122600009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800418600009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800070300005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800136300006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800137400003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800474200009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800019600002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800251400004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870006000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800020800005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800109600003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870020400006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800004900003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800139500009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870079800009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800038900003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800109400007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800331000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870078800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800004200007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800489900008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870043600005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800189300003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800062100009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800120800004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870014200008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800030100007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800062600009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800124700002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870008000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800393700007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870119800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800091500006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800290200001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870035400009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800006600007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800287300004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870085200003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800156500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800464300009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800503700003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800404500007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800036900005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800250500003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870087000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800006100007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800136200008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870043400009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800061200008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800073300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800132700002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800168800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800361300003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800364000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870039200009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870109700004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870118100005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870112100001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800053200008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800053300006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870096800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870096900006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800245000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800245100008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800082800001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800092300009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800164500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800320700004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800018600003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870007400003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800296600007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870094400008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800203600008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800053400004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800263100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870020500004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800083200002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800140200002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870091100007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800424500003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800045000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800205000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870105700008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800057200004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800168400006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870090000000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800086900005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800244800005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870028800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800001500004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800134800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870076000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800014400001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800232100003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870029700001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800036700009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800191700001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870046400006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800015300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800015500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800182400008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800182600004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870088100002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870088200000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800037900004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800212900001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800375400005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870014500002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800088600009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800165600005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870042200004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800031100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800287600008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870105000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800057300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800100800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870024700006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800018200001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870006300006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800002800007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800224500005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870077200003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800036200009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800108400008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800527200005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870028100004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800031600006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800105600007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870046200000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800037600000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800277100000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870110600003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800035300008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800042800009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800250300007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870103600002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800033000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800107500007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870033400001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800484700007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800081100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800246100007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870037500005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800055900002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800109200001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870038800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800130300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800317700009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800069500004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800182000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800503400009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870030700008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800015900000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800298300001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870009200005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870076600006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800036000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800130500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800084100003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800033800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800181800001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870046800008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800005700006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870043500007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800133700001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800122000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800085000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870022500002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800044800007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800233900006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870011700001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800006300003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800111500001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800364800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800429400000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800431000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800495100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870014600000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870101800000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870120600001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870120900005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800007000602.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800297700004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870000100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800036300007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800132300000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870050300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800084000005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800113600007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870048400004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800209000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800073900000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870023300005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800082000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800369000001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800495700004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800006800003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800236700007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800436400001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870038700000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800427800004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870120500003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800138400002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800138500000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800364400008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870005400005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870047000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800031900000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800227500002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870109100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800389200003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800573100001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800124100004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870111100002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800233400006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870104000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800051000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800053800006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800134600002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870084100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800017900008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800031500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800097600008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800504200002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800510100006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800042100003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800043200000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800107700003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870034300002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800421700002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800281400008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870045700001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800090000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800114500008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800500100008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870031300005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800070100009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800228200007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870013100001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800126600002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870114100009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800016100005.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870031400003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800230900009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800023900000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800196600008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870085700003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800017000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800142200000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870094300000.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800061000002.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800236100009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870079400007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800004500001.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9910545000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9907307000009.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903399000007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800405000006.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9800034400007.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906859000004.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9906884000003.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9985320000008.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905837000002.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9906635000004.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9905547000003.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9905783000007.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9900225000002.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9906073000004.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9911547000000.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9905691000008.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9903379000001.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9900128000000.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9910535000006.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9900254000007.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9910020000008.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9900283000002.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9903701000009.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9906413000002.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9911554000001.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9904169000003.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9905071000008.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9978356000001.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9800394500000.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9985394000000.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+      - host: 9985534000000.as4.smartservice.de
+        paths:
+          - path: /
+        pathType: Prefix
+  env:
+    TZ: Europe/Berlin
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    LOGGING_LEVEL_ROOT: 'INFO'
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    ADDRESSSERVICEURL: 'http://thuega-as4-prod-as4-address-service.thuega-as4-production:8080/aep-as4-address-service'
+    JAVA_TOOL_OPTIONS: '-XX:MaxDirectMemorySize=200M'
+    SPRING_PROFILES_ACTIVE: 'scaling'
+    STARTUPSSLCHECK: 'true'
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '23-02-2026'
+    TENANT_BATCH_SIZE: '100'
+
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        failureThreshold: 120
+        periodSeconds: 5
+
+  service:
+    enabled: true
+    type: ClusterIP
+    port:
+      port: 8443
+      name: http
+      protocol: TCP
+
+as4-message-service-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices  
+  env:
+    TZ: Europe/Berlin
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    DATASOURCE_URL: jdbc:postgresql://pgdb0528p01.postgres.database.azure.com:5432/db_28_b2bp01_as4_01?currentSchema=as4_messages&sslmode=prefer
+    DATASOURCE_USERNAME: 'tu_a_as4p01_as4_messages_01'
+    DATASOURCE_PASSWORD: '7oUdqLfxiDUUi2LXAsabyztNOBqt68MMaM6m6RP3Ks'
+    DATASOURCE_TYPE: postgres
+    SPRING_JPA_SHOWSQL: 'false'
+    LOGGING_LEVEL_ROOT: 'WARN'
+
+    DELETION_OLDERTHAN: 'P0Y6M'
+    DATASOURCE_DRIVER: 'org.postgresql.Driver'
+    DATASOURCE_DRIVERDELEGATECLASS: 'org.quartz.impl.jdbcjobstore.PostgreSQLDelegate'
+    DELETION_CRON: '0 30 * * * ?'
+    # logging.level.org.hibernate.engine.jdbc.spi.SqlExceptionHelper=OFF
+    LOGGING_LEVEL_ORG_HIBERNATE_ENGINE_JDBC_SPI: 'OFF'
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2500Mi
+    requests:
+      cpu: 1000m
+      memory: 2500Mi  
+
+as4-outbound-market-message-service-helm:
+  enabled: true
+  replicaCount: 2
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: Europe/Berlin
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    ADDRESSSERVERURL: 'http://thuega-as4-prod-as4-address-service.thuega-as4-production:8080/aep-as4-address-service/as4-address'
+    LOGGING_LEVEL_ROOT: 'WARN'
+  resources:
+    limits:
+      cpu: 1400m
+      memory: 2000Mi
+    requests:
+      cpu: 700m
+      memory: 2000Mi
+
+as4-outbound-sender-helm:
+  enabled: true
+  replicaCount: 6
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-prod-communicationservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-communicationservices
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+  env:
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    LOGGING_LEVEL_ROOT: 'WARN'
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    ADDRESSSERVICEURL: 'http://thuega-as4-prod-as4-address-service.thuega-as4-production:8080/aep-as4-address-service'
+    JDK_JAVA_OPTIONS: "-Djdk.tls.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_BRAINPOOLP384R1,TLS_ECDHE_ECDSA_WITH_BRAINPOOLP256R1,TLS_ECDHE_ECDSA_WITH_SECP384R1,TLS_ECDHE_ECDSA_WITH_SECP256R1 -Djdk.tls.namedGroups=brainpoolP384r1,brainpoolP256r1,secp384r1,secp256r1 -Dhttps.protocols=TLSv1.2 -Djdk.tls.client.protocols=TLSv1.2"
+    RECEIPTCRYPTOEXCHANGENAME: as4.verify
+    CONNECTIONTIMEOUT: '180'
+    SPRING_CLOUD_STREAM_BINDINGS_CONSUMESIGNEDENCRYPTEDMESSAGEIN0_CONSUMER_CONCURRENCY: '20'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CONSUMESIGNEDENCRYPTEDMESSAGEIN0_CONSUMER_MAXCONCURRENCY: '50'
+
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '23-02-2026'
+  #   JAVA_OPTS: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9011 -Djava.rmi.server.hostname=localhost"
+  # service:
+  #   extraPorts:
+  #     - port: 9010
+  #       name: jmx
+  #       protocol: TCP
+  #     - port: 9011
+  #       name: jmx-rmi
+  #       protocol: TCP
+
+as4-receipt-service-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: Europe/Berlin
+    RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    LOGGING_LEVEL_ROOT: 'INFO'
+    AUTOCONFIRMRELATION: 'true'
+    CHECKRELATION: 'false'
+    ADDRESSSERVICEURL: 'http://thuega-as4-prod-as4-address-service.thuega-as4-production:8080/aep-as4-address-service'
+    EXPECTEDELECTRICITYSERVICEIDS: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/pathSwitch,http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service,https://www.bdew.de/as4/communication/services/FP'
+    OUTBOUNDAS4RECEIPTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_OUTBOUNDAS4RECEIPTCONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+
+  resources:
+    limits:
+      cpu: 750m
+      memory: 1500Mi
+    requests:
+      cpu: 750m
+      memory: 1500Mi
+
+crl-downloader-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    READTIMEOUT: '600000'
+    LOGGING_LEVEL_ROOT: 'WARN'
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 800Mi
+    requests:
+      cpu: 250m
+      memory: 800Mi
+
+b2b-message-service-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-microservices
+  env:
+    TZ: Europe/Berlin
+    SPRING_RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+
+    DATASOURCE_URL: jdbc:postgresql://pgdb0528p01.postgres.database.azure.com:5432/db_28_b2bp01_b2b01?currentSchema=b2bbp
+    DATASOURCE_USERNAME: 'tu_a_b2bp01_b2bbp01'
+    DATASOURCE_PASSWORD: 'ClTXH8HbsGYWGN2BnQXsOJNKi8YMasuUWenQ7QmZzF'
+    DATASOURCE_SCHEMA: 'b2bbp'
+    
+    INBOUNDEDIFACTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_RECEIVEDAS4MESSAGECONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+    OUTBOUNDAS4RECEIPTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_OUTBOUNDAS4RECEIPTCONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+    WRITEREVISIONENTRIES: 'false'
+    USEEDIFACTREGISTRARCODEFORAS4: 'false'
+    OUTBOX.OUTBOXRELAY: 'true'
+    OUTBOX.OUTBOXEXCHANGE: 'as4.outbound.request'
+    OUTBOX.OUTBOXEXCHANGETYPE: 'direct'
+    LOGGING_LEVEL_ROOT: 'INFO'
+    PATHSWITCHMAXCONCURRENCY: '1'
+
+    FLAG_PROPERTY_FOR_SERVICE_RESTART: '2026-03-18'
+
+    B2BQUEUEPRIORITY_DEFAULTPRIORITY: 'low'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_0_TYPE: 'ALOCAT'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_0_LEVEL: 'ultra'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_1_SERVICEID: 'https://www.bdew.de/as4/communication/services/FP'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_1_LEVEL: 'high'
+
+    SPRING_CLOUD_STREAM_BINDINGS_RECEIVEDAS4MESSAGECONSUMERIN0_CONSUMER_CONCURRENCY: '10' # inbound delivery
+
+    #jackson.big-payload.max-string-length-in-mb=150
+    JACKSON_BIGPAYLOAD_MAXSTRINGLENGTHINMB: '150'
+    #spring.rabbitmq.max-inbound-message-body-size=150000000
+    SPRING_RABBITMQ_MAXINBOUNDMESSAGEBODYSIZE: '150000000'
+    DUPLICATEDETECTION: 'false'
+    # b2bQueueMessageSize.medium=50000
+    B2BQUEUEMESSAGESIZE_MEDIUM: '50000'
+    # b2bQueueMessageSize.large=1000000
+    B2BQUEUEMESSAGESIZE_LARGE: '1000000'
+    # b2bQueueMessageSize.exclusive=10000000
+    B2BQUEUEMESSAGESIZE_EXCLUSIVE: '10000000'
+
+
+  #   JAVA_OPTS: "-Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=9011 -Djava.rmi.server.hostname=localhost"
+  # service:
+  #   extraPorts:
+  #     - port: 9010
+  #       name: jmx
+  #       protocol: TCP
+  #     - port: 9011
+  #       name: jmx-rmi
+  #       protocol: TCP
+
+  resources:
+    limits:
+      cpu: '1'
+      memory: 3Gi
+    requests:
+      cpu: '1'
+      memory: 3Gi
+
+# service for customer Thüga only
+mkg-shipping-status-sender-helm:
+  enabled: true
+  replicaCount: 3
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-microservices"
+      effect: "NoExecute"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: dedicatedTo
+            operator: In
+            values:
+            - as4-prod-microservices
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  env:
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+    SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI: 'https://b2bnui-p-thuega-az.level-365.com/auth/realms/B2B'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_PROVIDER: 'keycloak'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT-ID: 'mkg-shipping-status-sender'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT-SECRET: 'YRgT0Obmg0Y48rMLJPXqBgazsAQFlfs4'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_AUTHORIZATION-GRANT-TYPE: 'client_credentials'
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI: 'https://b2bnui-p-thuega-az.level-365.com/auth/realms/B2B'
+    B2B_URL: 'https://b2b-p-thuega-az.level-365.com'
+    MKG_HOST_EXTERNAL: 'mkgw-arvato-integrationservice.p.container.smartservice.de'
+    MKG_INTERNAL_IP: '10.28.136.6'
+    MKG_URL: 'https://mkgw-arvato-integrationservice.p.container.smartservice.de:9443'
+    MKG_USERNAME: 'arvato-mkg'
+    MKG_PASSWORD: 'wD17fJ3m6vwZKg9LBSb9sDovJa'
+    MESSAGING_CONSUMERMAXATTEMPTS: '3'
+    JAVA_TOOL_OPTIONS: '-XX:MaxDirectMemorySize=200M'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CONSUMESENTMESSAGEEVENTIN0_CONSUMER_MAXCONCURRENCY: '50'
+    SPRING_CLOUD_STREAM_BINDINGS_CONSUMESENTMESSAGEEVENTIN0_CONSUMER_CONCURRENCY: '10'
+    LOGGING_LEVEL_ROOT: 'WARN'
+    FLAG_PROPERTY_FOR_SERVICE_RESTART: '2026-03-18'
+
+  hostAliases:
+    - ip: '10.28.136.6'
+      hostnames:
+        - 'mkgw-arvato-integrationservice.p.container.smartservice.de'
+
+certificate-manager-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-microservices"
+      effect: "NoExecute"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: dedicatedTo
+                operator: In
+                values:
+                  - as4-prod-microservices
+  env:
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: rabbitmq-cluster.thuega-as4-production.svc.cluster.local
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: 'JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT'
+
+    FSS_SERVER_API_URL: 'http://vmu0528fssp02.aep-az.int:3331/fss/api/v1'
+    LDAPS_ENABLED: 'true'
+    AS4ADDRESSSERVICEURL: 'http://thuega-as4-prod-as4-address-service.thuega-as4-production:8080/aep-as4-address-service'
+    CERTMANAGER_SUBCAURL_0_: 'ldaps://ldap.sub-ca.da-rz.net'
+    CERTMANAGER_SUBCAURL_1_: 'ldaps://ldap.sm-pki.trustcenter-services.com'
+    CERTMANAGER_SUBCAURL_2_: 'ldaps://ldap.energyca.telesec.de'
+    CERTMANAGER_SUBCAURL_3_: 'ldaps://ldap.cc-gwa.de'
+    CERTMANAGER_SUBCAURL_4_: 'ldaps://ldap.sm-pki.atos.net'
+    CERTMANAGER_SUBCAURL_5_: 'ldaps://ldap.gwadriga.de'
+    CERTMANAGER_SUBCAURL_6_: 'ldaps://ldaps.smartserviceca.sm-pki.smartservice.de'
+    CERTMANAGER_SUBCAURL_7_: 'ldaps://ldap.smpki.schleupen.cloud'
+    DOWNLOADPARTNERCERTIFICATESCHEDULER: '0 11 4,18 * * *'
+    TENANT: '9906595000003'
+    #SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CERTIFICATEDOWNLOADCOMMANDCONSUMERIN0_CONSUMER_DLQMAXLENGTH: '100'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CERTIFICATEDOWNLOADCOMMANDCONSUMERIN0_CONSUMER_DLQTTL: '86400000'
+    RENEWCERTIFICATEDAYSBEFOREEXPIRATION: '31'
+    API_CLIENT: ""
+    #certificateDownloadCommandMaxConcurrency=1
+    CERTIFICATEDOWNLOADCOMMANDMAXCONCURRENCY: '3'
+    LOGGING_LEVEL_ROOT: 'ERROR'
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+          failureThreshold: 900
+          periodSeconds: 5
+
+rabbitmq-cluster-operator:
+  enabled: true
+  rabbitmqImage:
+    repository: bitnamilegacy/rabbitmq
+  clusterOperator:
+    image:
+      repository: bitnamilegacy/rabbitmq-cluster-operator
+    metrics:
+      service:
+        enabled: true
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  msgTopologyOperator:
+    image:
+      repository: bitnamilegacy/rmq-messaging-topology-operator
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  extraDeploy:
+    - apiVersion: rabbitmq.com/v1beta1
+      kind: RabbitmqCluster
+      metadata:
+        name: rabbitmq-cluster
+      spec:
+        persistence:
+          storage: 128G
+          storageClassName: "rabbitmq-node-storage"
+        replicas: 3
+        rabbitmq:
+          additionalPlugins:
+            - rabbitmq_shovel
+            - rabbitmq_shovel_management
+            - rabbitmq_top
+          additionalConfig: |
+            raft.wal_max_size_bytes = 16000000
+            cluster_formation.target_cluster_size_hint = 3
+            vm_memory_high_watermark.relative = 0.7
+            reverse_dns_lookups = true
+          envConfig: |
+            RABBITMQ_DEFAULT_USER=rabbitmq-admin
+            RABBITMQ_DEFAULT_PASS=JKn1Cin4NBrQtKZ64UOUMNmZJPrdTAfg8i4mqU9gYT
+        tolerations:
+          - key: "dedicatedTo"
+            operator: "Equal"
+            value: "as4-prod-rabbitmq"
+            effect: "NoExecute"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: dedicatedTo
+                  operator: In
+                  values:
+                  - as4-prod-rabbitmq
+        resources:
+          limits:
+            cpu: '2'
+            memory: 4Gi
+          requests:
+            cpu: '2'
+            memory: 4Gi
+
+fss-helm:
+  enabled: false
+  replicaCount: 2
+  autoscaling:
+    enabled: false
+  type: statefulset
+  resources:
+    limits:
+      cpu: 6000m
+      memory: 12Gi
+    requests:
+      cpu: 6000m
+      memory: 12Gi
+
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-prod-fss"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-prod-fss
+
+  service:
+    enabled: true
+    type: ClusterIP
+    port:
+      port: 3331
+      name: http
+      protocol: HTTP
+
+  forcePodRecreationOnHelmUpdate: false
+
+  env:
+    TZ: 'Europe/Berlin'
+
+    SPRING_PROFILES_ACTIVE: 'nosecure'
+
+    DB_DRIVER: 'org.postgresql.Driver'
+    DB_URL: 'jdbc:postgresql://pgdb0511p02.postgres.database.azure.com:5432/db_11_as4p01_as4_fss?currentSchema=fss'
+    DB_USERNAME: 'tu_a_as4_fssp01_fss'
+    DB_PASSWORD: '4LtFXI1BGjm8kfSK0d9XxB9aEh9IDs1t986meHSvJp'
+    DB_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    NO_DEFAULT_CERT_PURPOSE: 'true'
+    SERVER_PORT: '3331'
+    CLUSTER_USE_CLUSTERNODE_HOSTNAME: "true"
+   #JAVA_OPTS: "-Dcluster.service.period=30 -Dverify.filter.mapping=/opt/securityserver/conf/verifyFilterMapping.properties -Drevision.info.server.url=http://changeme -Djavax.net.ssl.trustStoreType=JKS -Dhsm.slot.connection.inactivity.timeout=3 -DHSM_MIN_EVICTABLE_IDLE_MILLIS=180000 -DHSM_MIN_IDLE_CONNECTIONS_PER_SLOT=1 -DHSM_MAX_IDLE_CONNECTIONS_PER_SLOT=3 -DHSM_POOL_EVICTION_PERIOD=60000 -DHSM_MAX_POOLED_CONNECTIONS=3000"
+    JAVA_OPTS: "-Dcluster.service.period=30 -Dverify.filter.mapping=/opt/securityserver/conf/verifyFilterMapping.properties -Drevision.info.server.url=http://vmu0528b2bp01.aep-az.int:8081 -Djavax.net.ssl.trustStoreType=JKS -Dhsm.slot.connection.inactivity.timeout=3 -DHSM_MIN_EVICTABLE_IDLE_MILLIS=180000 -DHSM_MIN_IDLE_CONNECTIONS_PER_SLOT=1 -DHSM_MAX_IDLE_CONNECTIONS_PER_SLOT=2 -DHSM_MAX_POOLED_CONNECTIONS_PER_SLOT=5 -DHSM_POOL_EVICTION_PERIOD=60000 -DHSM_MAX_POOLED_CONNECTIONS=1500 -DHSM_POOL_TIMEOUT_ON_VALIDATE=true -DHSM_POOL_TIMEOUT_ON_VALIDATE_MILLIS=5000 -DHSM_POOL_TIMEOUT_CLEAR_SLOT=true -Dmanagement.health.ldap.enabled=false -Xmx12288m -Xms512m"
+
+   #JAVA_OPTS: "-Dcluster.service.period=60 -Dverify.filter.mapping=/opt/securityserver/conf/verifyFilterMapping.properties -Drevision.info.server.url=http://vmu0528b2bp01.aep-az.int:8081 -Djavax.net.ssl.trustStoreType=JKS -Dhsm.slot.connection.inactivity.timeout=3 -DHSM_MIN_EVICTABLE_IDLE_MILLIS=180000 -DHSM_MIN_IDLE_CONNECTIONS_PER_SLOT=1 -DHSM_MAX_IDLE_CONNECTIONS_PER_SLOT=2 -DHSM_MAX_POOLED_CONNECTIONS_PER_SLOT=5 -DHSM_POOL_EVICTION_PERIOD=60000 -DHSM_MAX_POOLED_CONNECTIONS=1500 -DHSM_POOL_TIMEOUT_ON_VALIDATE=true -DHSM_POOL_TIMEOUT_ON_VALIDATE_MILLIS=5000 -DHSM_POOL_TIMEOUT_CLEAR_SLOT=true -Dmanagement.health.ldap.enabled=false -Xmx8192m -Xms512m "
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

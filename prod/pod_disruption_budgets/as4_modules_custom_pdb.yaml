@@ -1,0 +1,46 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: b2b-message-service-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: b2b-message-service
+  minAvailable: 1
+
+# ---
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: certificate-manager-pdb
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: certificate-manager
+#   minAvailable: 1
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mkg-shipping-status-sender-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mkg-shipping-status-sender
+  minAvailable: 1
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: fss-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fss
+  minAvailable: 1
+# Add optionally as requried by system
+# MKG Shipping Status Sender
+# Additional inbound endpoints

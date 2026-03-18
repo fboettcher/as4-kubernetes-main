@@ -1,0 +1,20 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rabbitmq
+  namespace: monitoring
+  labels:
+    release: thuega-as4-prod-monitoring
+spec:
+  endpoints:
+  - port: prometheus
+    scheme: http
+    path: /metrics/per-object
+    interval: 15s
+    scrapeTimeout: 14s
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: rabbitmq
+  namespaceSelector:
+    any: true

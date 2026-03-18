@@ -1,0 +1,79 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-address-service-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-address-service
+  minAvailable: 1
+---
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: as4-cryptography-csr-pdb
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: as4-cryptography-csr
+#   minAvailable: 1
+# ---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-message-service-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-message-service
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-inbound-endpoint-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-inbound-endpoint
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-crypto-operations-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-crypto-operations
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-outbound-market-message-service-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-outbound-market-message-service
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-outbound-sender-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-outbound-sender
+  minAvailable: 1
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: as4-receipt-service-pdb
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: as4-receipt-service
+  minAvailable: 1

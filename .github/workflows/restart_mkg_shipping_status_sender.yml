@@ -1,0 +1,54 @@
+name: Restart mkg-shipping-status-sender
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Stage (dev/prod) for service restart'
+        required: true
+        default: 'prod'
+      flag_property_value:
+        description: 'Value of flag property for services restart'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN_PASSWORD_GITHUB }}
+
+      - name: set flag property value
+        id: set_properties
+        run: |
+          specified_flag_property_value=${{ github.event.inputs.flag_property_value }}
+          if [ -z ${specified_flag_property_value} ]; then
+            echo ::set-output name=FLAG_PROPERTY_VALUE::$(date +'%Y-%m-%d')
+          else
+            echo ::set-output name=FLAG_PROPERTY_VALUE::${specified_flag_property_value}
+          fi
+          
+          stage=${{ github.event.inputs.stage }}
+          if [ -z ${stage} ]; then
+            echo ::set-output name=STAGE::prod
+          else
+            echo ::set-output name=STAGE::${stage}
+          fi
+        shell: bash
+
+      - name: update flag property
+        run: |
+          git config user.email 'githubCi@bertelsmann.de'
+          git config user.name 'ci_github'
+          current_date=$(date +'%Y-%m-%d')
+          file_path=${{ steps.set_properties.outputs.STAGE }}/deployment/values.yaml
+          search_pattern="FLAG_PROPERTY_FOR_SERVICE_RESTART: '.*'"
+          replacement_string="FLAG_PROPERTY_FOR_SERVICE_RESTART: '${{ steps.set_properties.outputs.FLAG_PROPERTY_VALUE }}'"
+          sed -i "s/$search_pattern/$replacement_string/g" "$file_path"
+          git add "$file_path"
+          git diff-index --quiet HEAD || git commit -m 'restart mkg-shipping-status-sender'
+          git push --follow-tags
+        shell: bash

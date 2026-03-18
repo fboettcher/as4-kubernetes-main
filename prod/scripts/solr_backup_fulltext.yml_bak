@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: solr-backup-fulltext-daily
+spec:
+  schedule: "0 23 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: solr-backup-fulltext-daily
+            image: curlimages/curl:latest
+            imagePullPolicy: IfNotPresent
+            command:
+              - /bin/sh
+              - -ec
+              - >
+                  set -e ;
+                  CURRENT_TIME=$(TZ=Europe/Berlin date +%y-%m-%d_%H-%M);
+                  curl
+                  -u solr-p-admin:-OtZqh2TwFSmUkY2vFVL_Gc33YcWzk2OdVsY4yGHxm
+                  https://solr-p-thuega.level-365.com/solr/admin/collections\?action=BACKUP\&name=fulltext.$CURRENT_TIME\&collection=fulltext\&location=/var/solr/data/backup/fulltext\&maxNumBackupPoints=7
+          restartPolicy: OnFailure

@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: crl-downloader-script
+spec:
+  schedule: "0 23 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: crl-downloader-script
+            image: curlimages/curl:latest
+            imagePullPolicy: IfNotPresent
+            command: ["curl", "--location", "http://thuega-as4-dev-crl-downloader.thuega-as4-dev.svc.cluster.local:8080/aep-crl-downloader/revocation/update"]
+          restartPolicy: OnFailure

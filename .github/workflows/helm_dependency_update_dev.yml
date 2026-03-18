@@ -1,0 +1,22 @@
+name: Update Helm Dependencies on Change 
+
+on:
+  push:
+    paths:
+      - 'dev/deployment/Chart.yaml'
+concurrency:
+  group: dependency-update
+
+jobs:
+  helm_commands:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: call helm dependency update script
+      uses: arvato-energy-platform/.github/actions/update_helm_dependencies@helm-dependency-update
+      with:
+        chart-folder: 'dev/deployment'
+        REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+        REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        REGISTRY_URL: devnortheuropemgmtacr.azurecr.io
+

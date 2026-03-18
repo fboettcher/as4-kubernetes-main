@@ -1,0 +1,972 @@
+# Default values for deployment.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+as4-address-service-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: "Europe/Berlin"
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    DATASOURCE_URL: "jdbc:postgresql://pgdb0528d01.postgres.database.azure.com:5432/db_28_b2bq01_as4_01?currentSchema=as4_address&sslmode=prefer"
+    DATASOURCE_USERNAME: "tu_a_as4q01_as4_address_01"
+    DATASOURCE_PASSWORD: "wvjajmqvSKlKjCvzi2HyHqapC4LOeqVKHez88cFi4o"
+    DATASOURCE_TYPE: "postgres"
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+
+    AUTOCONFIRMRELATION: 'false'
+    PATHSWITCHINBOUNDEXCHANGENAME: 'as4.inbound'
+    PATHSWITCHINBOUNDGROUP: 'pathswitch'
+    PATHSWITCHOUTBOUNDEXCHANGENAME: 'as4.receipt.outbound'
+    PATHSWITCHOUTBOUNDGROUP: 'pathswitch'
+    EXTERNALEVENTPATHSWITCHEXCHANGENAME: 'as4.pathswitch.delivery'
+    EXTERNALEVENTPATHSWITCHHEADERNAME: 'tenant'
+    EXTERNALEVENTPATHSWITCHHEADERVALUES: ''
+
+  resources:
+    limits:
+      cpu: 600m
+      memory: 1200Mi
+    requests:
+      cpu: 600m
+      memory: 1200Mi
+
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-address-service/actuator/health
+          port: 8080
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-address-service/actuator/health
+          port: 8080
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-address-service/actuator/health
+          port: 8080
+        failureThreshold: 120
+        periodSeconds: 5
+
+as4-crypto-operations-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  # autoscaling:
+  #   enabled: true
+  #   minReplicas: 1
+  #   maxReplicas: 3
+  #   targetCPUUtilizationPercentage: 80
+  #   targetMemoryUtilizationPercentage: 80
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    SERVER_PORT: '8080'
+    CLIENTTENANT_FSSSHAREDCLIENT: 'shared-client'
+    SKIPRECEIPTVERIFICATION: 'true'
+    USEADDRESSFROMCERTIFICATE: 'true'
+    SPRING_PROFILES_ACTIVE: 'scaling'
+    SPRING_CLOUD_STREAM_BINDINGS_DECRYPTANDVERIFYIN0_CONSUMER_CONCURRENCY: '2'
+    SPRING_CLOUD_STREAM_BINDINGS_SIGNIN0_CONSUMER_CONCURRENCY: '2'
+    
+
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '2024-09-09'
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /actuator/health
+          port: 8080
+        failureThreshold: 120
+        periodSeconds: 5
+
+as4-cryptography-csr-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  service:
+    port:
+      port: 3333
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    JDK_JAVA_OPTIONS: "-Djdk.tls.namedGroups=brainpoolP384r1,brainpoolP256r1,secp384r1,secp256r1"
+    DATASOURCE_URL: 'jdbc:postgresql://pgdb0528d01.postgres.database.azure.com:5432/db_28_b2bq01_as4_01?currentSchema=as4_csr'
+    DATASOURCE_USERNAME: 'tu_a_as4q01_as4_csr_01'
+    DATASOURCE_PASSWORD: 'HG183ekkLn4LDz774Up9196EYVGc51Kv'
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    SSL_TRUST_CLIENT: 'shared-client'
+    CLIENTS_EXCLUDEDFROMTENANTS_0: 'shared-client'
+    CLIENTS_EXCLUDEDFROMTENANTS_1: 'undefined'
+    USER_HOME: '/opt/out'
+
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    SPRING_AUTOCONFIGURE_EXCLUDE: ''
+    SPRING_CLOUD_STREAM_BINDERS_RABBIT_DEFAULTCANDIDATE: 'true'
+    SPRING_CLOUD_STREAM_DEFAULTBINDER: 'rabbit'
+    SPRING_CLOUD_STREAM_BINDINGS_CSREVENTPRODUCEROUT0_DESTINATION: 'csr.event'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CSREVENTPRODUCEROUT0_PRODUCER_ROUTINGKEYEXPRESSION: 'default'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CSREVENTPRODUCEROUT0_PRODUCER_EXCHANGETYPE: 'topic'
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  # pvc:
+  #   nameSuffix: csr-data
+  #   size: 16Gi
+  #   accessModes:
+  #     - ReadWriteMany    
+  #   storageClass: csr-service-storage
+  #   skipuninstall: true # Optional: prevents Helm from deleting PVC on uninstall
+
+  # storages:
+  #   csr-data:
+  #     enabled: true
+  #     mountPath: /opt/out
+
+  # volumes:
+  #   - name: csr-data
+  #     persistentVolumeClaim:
+  #       claimName: csr-data
+
+
+
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /as4-crypto-csr/api/v1/actuator/health
+            port: 3333
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /as4-crypto-csr/api/v1/actuator/health
+            port: 3333
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /as4-crypto-csr/api/v1/actuator/health
+            port: 3333
+          failureThreshold: 900
+          periodSeconds: 5  
+
+as4-inbound-endpoint-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-communicationservices"
+      effect: "NoExecute"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: dedicatedTo
+                operator: In
+                values:
+                  - as4-dev-communicationservices
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+  ingress:
+    enabled: true
+    ingressClassName: "nginx"
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      - host: 9905071000008.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9911566000007.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9900223000004.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905141000003.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9905859000006.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9903953000005.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+      - host: 9870091100007.test.as4.smartservice.de
+        paths:
+          - path: /
+            pathType: Prefix
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    ADDRESSSERVICEURL: 'http://thuega-as4-dev-as4-address-service.thuega-as4-dev:8080/aep-as4-address-service'
+    JAVA_TOOL_OPTIONS: '-XX:MaxDirectMemorySize=200M'
+    SPRING_PROFILES_ACTIVE: 'scaling'
+    LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB: 'INFO'
+    LOGGING_LEVEL_AEP_AS4: 'INFO'
+    STARTUPSSLCHECK: 'true'
+
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '2025-06-24'
+
+  service:
+    enabled: true
+    type: ClusterIP
+    port:
+      port: 8443
+      name: http
+      protocol: TCP
+    extraPorts:
+      - port: 8080
+        name: monitoring
+        protocol: TCP 
+
+as4-message-service-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+                - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    DATASOURCE_URL: 'jdbc:postgresql://pgdb0528d01.postgres.database.azure.com:5432/db_28_b2bq01_as4_01?currentSchema=as4_messages&sslmode=prefer'
+    DATASOURCE_USERNAME: 'tu_a_as4q01_as4_messages_01'
+    DATASOURCE_PASSWORD: '6poCJmQpivXyqUxudlrSgDyNqnxa4CLgSPe4nBmlyo'
+    DATASOURCE_TYPE: 'postgres'
+    SPRING_JPA_SHOWSQL: 'false'
+    LOGGING_LEVEL_AEP_AS4: 'INFO'
+    # DATASOURCE_DRIVER: 'org.postgresql.Driver'
+    # DATASOURCE_DRIVERDELEGATECLASS: 'org.quartz.impl.jdbcjobstore.PostgreSQLDelegate'
+    # DELETION_OLDERTHAN: "T12H0M0S"
+    # DELETION_CRON: "0 35 * * * ?"
+
+  resources:
+    limits:
+      cpu: 750m
+      memory: 1500Mi
+    requests:
+      cpu: 750m
+      memory: 1500Mi
+
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-as4-message-service/actuator/health
+            port: http
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-as4-message-service/actuator/health
+            port: http
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-as4-message-service/actuator/health
+            port: http
+          failureThreshold: 900
+          periodSeconds: 5
+
+as4-outbound-market-message-service-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-microservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    ADDRESSSERVERURL: 'http://thuega-as4-dev-as4-address-service.thuega-as4-dev:8080/aep-as4-address-service/as4-address'
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: aep-as4-outbound-market-message-service/actuator/health
+          port: 8080
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: aep-as4-outbound-market-message-service/actuator/health
+          port: 8080
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: aep-as4-outbound-market-message-service/actuator/health
+          port: 8080
+        failureThreshold: 120
+        periodSeconds: 5
+
+as4-outbound-sender-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  # autoscaling:
+  #   enabled: true
+  #   minReplicas: 1
+  #   maxReplicas: 3
+  #   targetCPUUtilizationPercentage: 80
+  #   targetMemoryUtilizationPercentage: 80
+  tolerations:
+      - key: "dedicatedTo"
+        operator: "Equal"
+        value: "as4-dev-communicationservices"
+        effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-communicationservices
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    ADDRESSSERVICEURL: 'http://thuega-as4-dev-as4-address-service.thuega-as4-dev:8080/aep-as4-address-service'
+    RECEIPTCRYPTOEXCHANGENAME: as4.verify
+    SPRING_CLOUD_STREAM_BINDINGS_CONSUMESIGNEDENCRYPTEDMESSAGEIN0_CONSUMER_CONCURRENCY: '20'
+    CONNECTIONTIMEOUT: '180'
+
+    LOGGING_LEVEL_ORG_BOUNCYCASTLE_JSSE: 'TRACE'
+    JDK_JAVA_OPTIONS: "-Djdk.tls.cipherSuites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_BRAINPOOLP384R1,TLS_ECDHE_ECDSA_WITH_BRAINPOOLP256R1,TLS_ECDHE_ECDSA_WITH_SECP384R1,TLS_ECDHE_ECDSA_WITH_SECP256R1 -Djdk.tls.namedGroups=brainpoolP384r1,brainpoolP256r1,secp384r1,secp256r1 -Dhttps.protocols=TLSv1.2 -Djdk.tls.client.protocols=TLSv1.2"
+
+    FLAG_PROPERTY_FOR_KEYSTORE_UPDATE_ON_PODS_RESTART_WHILE_OTHER_ARE_RUNNING: '2024-09-09'
+    CONSUMER_MAX_RETRIES: '1'
+
+as4-receipt-service-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    RABBITMQ_PORT: '5672'
+    RABBITMQ_USERNAME: 'rabbitmq-admin'
+    RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+
+    AUTOCONFIRMRELATION: 'true'
+    CHECKRELATIONGAS: 'true'
+    ADDRESSSERVICEURL: 'http://thuega-as4-dev-as4-address-service.thuega-as4-dev:8080/aep-as4-address-service'
+    EXPECTEDELECTRICITYSERVICEIDS: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/pathSwitch,http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service,https://www.bdew.de/as4/communication/services/FP'
+    OUTBOUNDAS4RECEIPTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_OUTBOUNDAS4RECEIPTCONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+
+  resources:
+    limits:
+      cpu: 600m
+      memory: 1200Mi
+    requests:
+      cpu: 600m
+      memory: 1200Mi
+
+  probes:
+    liveness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-receipt-service/actuator/health
+          port: 8080
+    readiness:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-receipt-service/actuator/health
+          port: 8080
+    startup:
+      enabled: true
+      custom: true
+      spec:
+        httpGet:
+          path: /aep-as4-receipt-service/actuator/health
+          port: 8080
+        failureThreshold: 120
+        periodSeconds: 5
+
+crl-downloader-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    READTIMEOUT: '120000'
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1000Mi
+    requests:
+      cpu: 500m
+      memory: 1000Mi
+
+b2b-message-service-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+
+    DATASOURCE_URL: 'jdbc:postgresql://pgdb0528d01.postgres.database.azure.com:5432/db_28_b2bq01_b2b01?currentSchema=b2bbp'
+    DATASOURCE_USERNAME: 'tu_a_b2bq01_b2bbp01'
+    DATASOURCE_PASSWORD: 'aoTIo5aRWeFVDe5jp4yauXrQhrxtoo5tZ1gecVSrY2'
+    DATASOURCE_SCHEMA: 'b2bbp'
+
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_RECEIVEDAS4MESSAGECONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+    INBOUNDEDIFACTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_OUTBOUNDAS4RECEIPTCONSUMERIN0_CONSUMER_BINDINGROUTINGKEYDELIMITER: ','
+    OUTBOUNDAS4RECEIPTROUTINGKEY: 'https://www.bdew.de/as4/communication/services/MP,https://www.bdew.de/as4/communication/services/FP'
+    WRITEREVISIONENTRIES: 'false'
+    USEEDIFACTREGISTRARCODEFORAS4: 'false'
+    OUTBOX.OUTBOXRELAY: 'true'
+    OUTBOX.OUTBOXEXCHANGE: 'as4.outbound.request'
+    OUTBOX.OUTBOXEXCHANGETYPE: 'direct'
+
+    B2BQUEUEPRIORITY_DEFAULTPRIORITY: 'low'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_0_TYPE: 'ALOCAT'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_0_LEVEL: 'ultra'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_1_SERVICEID: 'https://www.bdew.de/as4/communication/services/FP'
+    B2BQUEUEPRIORITY_PRIORITYCLASSES_1_LEVEL: 'high'
+
+  resources:
+    limits:
+      cpu: 750m
+      memory: 1500Mi
+    requests:
+      cpu: 750m
+      memory: 1500Mi
+
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-b2b-message-service/actuator/health
+            port: http
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-b2b-message-service/actuator/health
+            port: http
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-b2b-message-service/actuator/health
+            port: http
+          failureThreshold: 900
+          periodSeconds: 5
+
+# service for customer Thüga only
+mkg-shipping-status-sender-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: dedicatedTo
+                operator: In
+                values:
+                  - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+    SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI: 'https://b2bnui-q-thuega-az.level-365.com/auth/realms/B2B'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_PROVIDER: 'keycloak'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT-ID: 'mkg-shipping-status-sender'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENT-SECRET: 'OMNi5vRq2dfI2qsE68MvpFNBlsuoJt1f'
+    SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_AUTHORIZATION-GRANT-TYPE: 'client_credentials'
+    SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI: 'https://b2bnui-q-thuega-az.level-365.com/auth/realms/B2B'
+    B2B_URL: 'https://b2b-bo-q-thuega-az.level-365.com'
+    MKG_HOST_EXTERNAL: 'mkgw-arvato-integrationservice.q.container.smartservice.de'
+    MKG_INTERNAL_IP: '10.28.136.6'
+    MKG_URL: 'https://mkgw-arvato-integrationservice.q.container.smartservice.de:8443'
+    MKG_USERNAME: 'arvato-mkg'
+    MKG_PASSWORD: '4dQbkWfPEubCt45Rpy4y6kzOHPNMht'
+    MESSAGING_CONSUMERMAXATTEMPTS: '3'
+    JAVA_TOOL_OPTIONS: '-XX:MaxDirectMemorySize=200M'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CONSUMESENTMESSAGEEVENTIN0_CONSUMER_MAXCONCURRENCY: '50'
+    SPRING_CLOUD_STREAM_BINDINGS_CONSUMESENTMESSAGEEVENTIN0_CONSUMER_CONCURRENCY: '2'
+
+    FLAG_PROPERTY_FOR_SERVICE_RESTART: '2024-05-29.1'
+
+  hostAliases:
+    - ip: '10.28.136.6'
+      hostnames:
+        - 'mkgw-arvato-integrationservice.q.container.smartservice.de'
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1000Mi
+    requests:
+      cpu: 500m
+      memory: 1000Mi
+
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /mkg-shipping-status-sender/actuator/health
+            port: http
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /mkg-shipping-status-sender/actuator/health
+            port: http
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /mkg-shipping-status-sender/actuator/health
+            port: http
+          failureThreshold: 900
+          periodSeconds: 5
+
+certificate-manager-helm:
+  enabled: true
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
+  env:
+    MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: 'health, prometheus'
+    TZ: 'Europe/Berlin'
+    SPRING_RABBITMQ_HOST: 'rabbitmq-cluster.thuega-as4-dev.svc.cluster.local'
+    SPRING_RABBITMQ_PORT: '5672'
+    SPRING_RABBITMQ_USERNAME: 'rabbitmq-admin'
+    SPRING_RABBITMQ_PASSWORD: '07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy'
+
+    FSS_SERVER_API_URL: 'http://vmu0528fssd02.aep-az.int:3331/fss/api/v1'
+    LDAPS_ENABLED: 'true'
+    AS4ADDRESSSERVICEURL: 'http://thuega-as4-dev-as4-address-service.thuega-as4-dev:8080/aep-as4-address-service'
+    CERTMANAGER_SUBCAURL_0_: 'ldaps://ldap.sm-pkitest.atos.net'
+    CERTMANAGER_SUBCAURL_1_: 'ldap://ldap.sm-test-pki-de.da-rz.net'
+    CERTMANAGER_SUBCAURL_2_: 'ldaps://ldap.energyca.test.telesec.de '
+    CERTMANAGER_SUBCAURL_3_: 'ldaps://smgw-ldap-test.schleupen.de'
+    CERTMANAGER_SUBCAURL_4_: 'ldaps://ldap.smartserviceca.test.sm-pki.smartservice.de'
+    DOWNLOADPARTNERCERTIFICATESCHEDULER: '0 30 18 * * *'
+    TENANT: '9911566000007'
+    SPRING_CLOUD_STREAM_RABBIT_BINDINGS_CERTIFICATEDOWNLOADCOMMANDCONSUMERIN0_CONSUMER_DLQMAXLENGTH: '1'
+
+  resources:
+    limits:
+      cpu: 400m
+      memory: 800Mi
+    requests:
+      cpu: 400m
+      memory: 800Mi
+
+  probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+      readiness:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+      startup:
+        enabled: true
+        custom: true
+        spec:
+          httpGet:
+            path: /aep-certificate-manager/actuator/health
+            port: http
+          failureThreshold: 900
+          periodSeconds: 5
+
+rabbitmq-cluster-operator:
+  enabled: true
+  rabbitmqImage:
+    repository: bitnamilegacy/rabbitmq
+  clusterOperator:
+    image:
+      repository: bitnamilegacy/rabbitmq-cluster-operator
+    metrics:
+      service:
+        enabled: true
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  msgTopologyOperator:
+    image:
+      repository: bitnamilegacy/rmq-messaging-topology-operator
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 200m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+  extraDeploy:
+    - apiVersion: rabbitmq.com/v1beta1
+      kind: RabbitmqCluster
+      metadata:
+        name: rabbitmq-cluster
+      spec:
+        persistence:
+          storage: 128G
+          storageClassName: "rabbitmq-node-storage"
+        replicas: 3
+        rabbitmq:
+          additionalPlugins:
+            - rabbitmq_shovel
+            - rabbitmq_shovel_management
+            - rabbitmq_top
+          additionalConfig: |
+            raft.wal_max_size_bytes = 16000000
+            cluster_formation.target_cluster_size_hint = 3
+            vm_memory_high_watermark.relative = 0.7
+            reverse_dns_lookups = true
+          envConfig: |
+            RABBITMQ_DEFAULT_USER=rabbitmq-admin
+            RABBITMQ_DEFAULT_PASS=07y46csCl0wdYorUEb8MPDeBynenG2BmKYLmPbePJy
+        tolerations:
+          - key: "dedicatedTo"
+            operator: "Equal"
+            value: "as4-dev-rabbitmq"
+            effect: "NoExecute"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: dedicatedTo
+                  operator: In
+                  values:
+                  - as4-dev-rabbitmq
+        resources:
+          limits:
+            cpu: '3'
+            memory: 6Gi
+          requests:
+            cpu: 1500m
+            memory: 3Gi
+
+fss-helm:
+  enabled: false
+
+hsm-simulator-helm:
+  enabled: false
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  resources:
+    limits:
+      cpu: 400m
+      memory: 800Mi
+    requests:
+      cpu: 400m
+      memory: 800Mi
+
+  podSecurityContext:
+  #  runAsUser: 5000       # UID of 'hsm' user in your container
+  #  runAsGroup: 5000      # GID of 'hsm' group in your container
+    fsGroup: 5000         # Ensures mounted volume is writable by this group
+
+  tolerations:
+    - key: "dedicatedTo"
+      operator: "Equal"
+      value: "as4-dev-microservices"
+      effect: "NoExecute"
+  affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: dedicatedTo
+              operator: In
+              values:
+              - as4-dev-microservices
